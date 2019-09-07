@@ -43,11 +43,11 @@
 		# Coleta a cor RGB do teclado
 		li s5, 0x00FF0000	
 		
-		call draw_empty_rectangle
+		call draw_full_rectangle
 		
 	#-------------------------------------------------------------------------
 	# Funcao draw_full_rectangle: Recebe de parametro 2 pontos e uma cor RGB
-	# e desenha um retângulo preenchido, tendo em vista que o X e o Y inciais são menores que os finais
+	# e desenha um retângulo preenchido, tendo em vista que o X e o Y inciais são menores que os finais.
 	# Parametros:
 	#	s1 - Xi
 	#	s2 - Yi
@@ -83,7 +83,7 @@
 		sw 	s5, 0(t0) 	# Colorindo o ponto atual
 		addi	t0, t0, 4	# Pula para o próximo ponto
 		addi	t2, t2, 1	# Adiciona o contador de linha
-		bge 	t2, s3, caboulinha	# Confere se já acabou a linha
+		bgt 	t2, s3, caboulinha	# Confere se já acabou a linha
 		jal	draw_full_rectangle_loop	# Enquanto não acabou a linha, pinta
 		
 	caboulinha:
@@ -91,7 +91,7 @@
 		mv	t2, t4
 		slli	t2, t2, 2	# Multiplica por 4	
 		sub	t0, t0, t2 	# Volta para o começo da linha
-		addi	t0, t0, -256	# Pula para linha anterior
+		addi	t0, t0, -260	# Pula para linha anterior (- 256(linha) - 4(loop soma 4 antes de conferir se acabou)),
 		sub	t2, s3, t4	# Reseta o Contador de linha t2 = XFinal - DeltaX
 		addi	t3, t3, 1	# Acrescenta contador de coluna
 		bge	s4, t3, draw_full_rectangle_loop	# Enquanto não tiver chegado na coluna máxima
