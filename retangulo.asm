@@ -46,16 +46,15 @@
 		call draw_empty_rectangle
 		
 	#-------------------------------------------------------------------------
-	# Funcao draw_full_rectangle: recebe de input do teclado 2 pontos e cores rgb 
-	# e desenha um retângulo, tendo em vista que o X e o Y inciais são menores que os finais
+	# Funcao draw_full_rectangle: Recebe de parametro 2 pontos e uma cor RGB
+	# e desenha um retângulo preenchido, tendo em vista que o X e o Y inciais são menores que os finais
 	# Parametros:
-	#	recebe do teclado
-	# Registradores:
 	#	s1 - Xi
 	#	s2 - Yi
 	#	s3 - Xf
 	#	s4 - Yf
 	#	s5 - Cor RGB
+	#
 	# A função foi implementada da seguinte maneira:
 	# 1 - Coloca o ponteiro da imagem no ponto Xiniail, Yinicial
 	# 2 - Para cada linha, acrescenta o ponteiro e pinta até chegar no Xfinal
@@ -100,15 +99,14 @@
 	
 	
 	#-------------------------------------------------------------------------
-	# Funcao draw_empty_rectangle: recebe de input do teclado 2 pontos e cores rgb 
+	# Funcao draw_empty_rectangle: Recebe 2 pontos de parametro, cores RGB
 	# e desenha as bordas de  retângulo, tendo em vista que o X e o Y inciais são menores que os finais
 	# Parametros:
-	#	recebe do teclado
-	# Registradores:
 	#	s1 - Xi
 	#	s2 - Yi
 	#	s3 - Xf
 	#	s4 - Yf
+	#	s5 - Cor RGB
 	#
 	# A função foi implementada da seguinte maneira:
 	# 1 - Coloca o ponteiro da imagem no ponto Xinicial, Yinicial
@@ -131,9 +129,8 @@
 		lw 	t0, init
 		add	t0, t0, s1	# Somando o valor de Xinicial
 		sub	t0, t0, s2 	# Subtraindo o valor de Yinicial
-		mv	t6, t0
 		
-		# Colore a primeira coluna
+		# Colore a coluna da esquerda
 		addi	s3, x0, 0
 		call draw_empty_rectangle_colum
 		
@@ -151,22 +148,24 @@
 		addi	s3, x0, 0
 		call draw_empty_rectangle_line
 		
-		# Colore a última coluna
+		# Colore a coluna da direita
 		addi	t0, t0, -4
 		addi	s3, x0, 0
 		call draw_empty_rectangle_colum
 		ret
 		
+	# Desenha uma coluna, com ponto inicial t0, cor s5 e tamanho t5. OBS: Necessário s3 zerado
 	draw_empty_rectangle_colum:
 		sw 	s5, 0(t0) 	# Colorindo o ponto atual
-		addi	t0, t0, -256	# Pula para o próximo ponto
+		addi	t0, t0, -256	# Pula para o ponto na linha anterior
 		addi	s3, s3, 1	# Adiciona o contador de linha
 		bge 	t5, s3, draw_empty_rectangle_colum	# Confere se já acabou a linha
-		ret	# Enquanto não acabou a linha, pinta
-		
+		ret	
+	
+	# Desenha uma linha, com ponto inicial t0, cor s5 e tamanho t4. OBS: Necessário s3 zerado	
 	draw_empty_rectangle_line:
 		sw 	s5, 0(t0) 	# Colorindo o ponto atual
 		addi	t0, t0, 4	# Pula para o próximo ponto
 		addi	s3, s3, 1	# Adiciona o contador de linha
 		bge 	t4, s3, draw_empty_rectangle_line	# Confere se já acabou a linha
-		ret	# Enquanto não acabou a linha, pinta
+		ret	
