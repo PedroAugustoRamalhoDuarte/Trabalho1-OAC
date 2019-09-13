@@ -3,6 +3,7 @@
 	yInicial:	.asciz	"Digite um valor para o Y inicial(0 a 63):"
 	xFinal:		.asciz	"Digite um valor para o X final(0 a 63):"
 	yFinal:		.asciz	"Digite um valor para o Y final(0 a 63):"
+	msgOutOfRange:	.asciz  "Por gentileza coloque os valores de X e Y, iniciais e finais, entre 0 e 63"
 	init:		.word	0x10043F00	# 0x10040000 + 64x63 
 .text
 
@@ -45,8 +46,63 @@
 		
 		call draw_full_rectangle
 		
+		li a7, 10
+		ecall
+		
+		
 	#-------------------------------------------------------------------------
-	# Funcao draw_full_rectangle: Recebe de parametro 2 pontos e uma cor RGB
+	# Funcao verifica_x_y: Verifica se todos os valores de entrada estão entre 0 e 63,
+	# e coloca o menor entre os X no a1 e o menor entre o Y no a2
+	# Parametros:
+	#	a1 - Xi
+	#	a2 - Yi
+	#	a3 - Xf
+	#	a4 - Yf
+	#
+	verifica_x_y:
+		# Auxiliar de comparação
+		li t1, 63
+		
+		# Primeiro verifica se são maiores 63
+		bgt a1, t1, verifica_x_y_error
+		bgt a2, t1, verifica_x_y_error
+		bgt a3, t1, verifica_x_y_error
+		bgt a4, t1, verifica_x_y_error
+		
+		li t1, -1
+		
+		# Agora verifica se são menores que 0
+		bltz a1, verifica_x_y_error
+		bltz a2, verifica_x_y_error
+		bltz a3, verifica_x_y_error
+		bltz a4, verifica_x_y_error
+	
+	verifica_x_y_adequado:	
+		# Agora ajusta para o a1 e o s2 serem os menores que a3 e a4, 
+		bgt a1, a3, verifica_x_y_swap_x
+		bgt a2, a4, verifica_x_y_swap_x
+		ret
+		
+	verifica_x_y_swap_x:
+		# Troca os valores de X
+		mv a1, t1
+		mv a3, a1
+		mv t1, a3
+		b verifica_x_y_adequado
+	
+	verifica_x_y_swap_y:
+		# Troca os valoers de Y
+		mv a2, t1
+		mv a4, a2
+		mv t1, a4
+		b verifica_x_y_adequado
+		
+	verifica_x_y_error:
+		print_string(msgOutOfRange)
+		ret
+		
+	#-----------------------------------------------------------------
+	# Funcao draw_full_rectangle: Recebe de parametro 4 pontos e uma cor RGB
 	# e desenha um retângulo preenchido, tendo em vista que o X e o Y inciais são menores que os finais.
 	# Parametros:
 	#	s1 - Xi
@@ -84,7 +140,7 @@
 		addi	t0, t0, 4	# Pula para o próximo ponto
 		addi	t2, t2, 1	# Adiciona o contador de linha
 		bgt 	t2, s3, caboulinha	# Confere se já acabou a linha
-		jal	draw_full_rectangle_loop	# Enquanto não acabou a linha, pinta
+		b	draw_full_rectangle_loop	# Enquanto não acabou a linha, pinta
 		
 	caboulinha:
 		# Muda a linha ou verifica se já acabou
@@ -96,6 +152,7 @@
 		addi	t3, t3, 1	# Acrescenta contador de coluna
 		bge	s4, t3, draw_full_rectangle_loop	# Enquanto não tiver chegado na coluna máxima
 		ret
+	#-----------------------------------------------------------------
 	
 	
 	#-------------------------------------------------------------------------
