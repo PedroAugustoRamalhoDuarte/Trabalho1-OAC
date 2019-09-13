@@ -27,24 +27,24 @@
 		# Coleta os pontos do retângulo
 		print_string(xInicial)
 		input_int()
-		mv s1, t0	# S1 = XInicial
+		mv a1, t0	# S1 = XInicial
 		
 		print_string(yInicial)
 		input_int()
-		mv s2, t0	# S2 = YInicial
+		mv a2, t0	# S2 = YInicial
 		
 		print_string(xFinal)
 		input_int()
-		mv s3, t0	# S3 = XFinal
+		mv a3, t0	# S3 = XFinal
 		
 		print_string(yFinal)
 		input_int()
-		mv s4, t0	# S4 = YFinal
+		mv a4, t0	# S4 = YFinal
 		
 		# Coleta a cor RGB do teclado
-		li s5, 0x00FF0000	
+		li a5, 0x00FF0000	
 		
-		call draw_full_rectangle
+		call verifica_x_y
 		
 		li a7, 10
 		ecall
@@ -78,23 +78,23 @@
 		bltz a4, verifica_x_y_error
 	
 	verifica_x_y_adequado:	
-		# Agora ajusta para o a1 e o s2 serem os menores que a3 e a4, 
+		# Agora ajusta para o a1 e o a2 serem os menores que a3 e a4, 
 		bgt a1, a3, verifica_x_y_swap_x
-		bgt a2, a4, verifica_x_y_swap_x
+		bgt a2, a4, verifica_x_y_swap_y
 		ret
 		
 	verifica_x_y_swap_x:
 		# Troca os valores de X
-		mv a1, t1
-		mv a3, a1
-		mv t1, a3
+		mv t1, a1
+		mv a1, a3
+		mv a3, t1
 		b verifica_x_y_adequado
 	
 	verifica_x_y_swap_y:
 		# Troca os valoers de Y
-		mv a2, t1
-		mv a4, a2
-		mv t1, a4
+		mv t1, a2
+		mv a2, a4
+		mv a4, t1
 		b verifica_x_y_adequado
 		
 	verifica_x_y_error:
@@ -105,11 +105,11 @@
 	# Funcao draw_full_rectangle: Recebe de parametro 4 pontos e uma cor RGB
 	# e desenha um retângulo preenchido, tendo em vista que o X e o Y inciais são menores que os finais.
 	# Parametros:
-	#	s1 - Xi
-	#	s2 - Yi
-	#	s3 - Xf
-	#	s4 - Yf
-	#	s5 - Cor RGB
+	#	a1 - Xi
+	#	a2 - Yi
+	#	a3 - Xf
+	#	a4 - Yf
+	#	a5 - Cor RGB
 	#
 	# A função foi implementada da seguinte maneira:
 	# 1 - Coloca o ponteiro da imagem no ponto Xiniail, Yinicial
@@ -117,29 +117,33 @@
 	# 3 - Depois de preencher as colunas da linha, volta uma linha caso n tenha 
 	#     chegado no Y final e repete o passo 2
 	 
-	draw_full_rectangle:		
+	draw_full_rectangle:
+	
+		# Chama a sub-rotina que verifica se as entradas da função estão de acordo, e modifca dentro do possível
+		call	verifica_x_y
+			
 		# Auxiliares lógicos
-		sub	t4, s3, s1	# Delta X
+		sub	t4, a3, a1	# Delta X
 		
 		# Auxiliares para contar linha
-		addi	t2, s1, 0	# t2 contador para pontos na linha
-		addi	t3, s2, 0	# t3 contador para pontos na coluna
+		addi	t2, a1, 0	# t2 contador para pontos na linha
+		addi	t3, a2, 0	# t3 contador para pontos na coluna
 		
 		# Multiplica para somar certo os ponteiros
-		slli	s2, s2, 8		#s2 = s2 * 4 * 64
-		slli	s1, s1, 2		#s1 = s1 * 4
+		slli	a2, a2, 8		#a2 = a2 * 4 * 64
+		slli	a1, a1, 2		#a1 = a1 * 4
 	
 		# Cor está em t1, ponteiro inicial do retangulo está em t0
 		lw 	t0, init
-		add	t0, t0, s1	# Somando o valor de Xinicial
-		sub	t0, t0, s2 	# Subtraindo o valor de Yinicial
+		add	t0, t0, a1	# Somando o valor de Xinicial
+		sub	t0, t0, a2 	# Subtraindo o valor de Yinicial
 	
 	draw_full_rectangle_loop:
 		# Pinta uma linha
-		sw 	s5, 0(t0) 	# Colorindo o ponto atual
+		sw 	a5, 0(t0) 	# Colorindo o ponto atual
 		addi	t0, t0, 4	# Pula para o próximo ponto
 		addi	t2, t2, 1	# Adiciona o contador de linha
-		bgt 	t2, s3, caboulinha	# Confere se já acabou a linha
+		bgt 	t2, a3, caboulinha	# Confere se já acabou a linha
 		b	draw_full_rectangle_loop	# Enquanto não acabou a linha, pinta
 		
 	caboulinha:
@@ -148,9 +152,9 @@
 		slli	t2, t2, 2	# Multiplica por 4	
 		sub	t0, t0, t2 	# Volta para o começo da linha
 		addi	t0, t0, -260	# Pula para linha anterior (- 256(linha) - 4(loop soma 4 antes de conferir se acabou)),
-		sub	t2, s3, t4	# Reseta o Contador de linha t2 = XFinal - DeltaX
+		sub	t2, a3, t4	# Reseta o Contador de linha t2 = XFinal - DeltaX
 		addi	t3, t3, 1	# Acrescenta contador de coluna
-		bge	s4, t3, draw_full_rectangle_loop	# Enquanto não tiver chegado na coluna máxima
+		bge	a4, t3, draw_full_rectangle_loop	# Enquanto não tiver chegado na coluna máxima
 		ret
 	#-----------------------------------------------------------------
 	
@@ -159,11 +163,11 @@
 	# Funcao draw_empty_rectangle: Recebe 2 pontos de parametro, cores RGB
 	# e desenha as bordas de  retângulo, tendo em vista que o X e o Y inciais são menores que os finais
 	# Parametros:
-	#	s1 - Xi
-	#	s2 - Yi
-	#	s3 - Xf
-	#	s4 - Yf
-	#	s5 - Cor RGB
+	#	a1 - Xi
+	#	a2 - Yi
+	#	a3 - Xf
+	#	a4 - Yf
+	#	a5 - Cor RGB
 	#
 	# A função foi implementada da seguinte maneira:
 	# 1 - Coloca o ponteiro da imagem no ponto Xinicial, Yinicial
@@ -175,54 +179,55 @@
 	
 	draw_empty_rectangle:
 		# Auxiliares lógicos
-		sub	t4, s3, s1	# Delta X
-		sub	t5, s4, s2	# Delta Y
+		sub	t4, a3, a1	# Delta X
+		sub	t5, a4, a2	# Delta Y
 		
 		# Multiplica para somar certo os ponteiros
-		slli	s2, s2, 8		#s2 = s2 * 4 * 64
-		slli	s1, s1, 2		#s1 = s1 * 4
+		slli	a2, a2, 8		#a2 = a2 * 4 * 64
+		slli	a1, a1, 2		#a1 = a1 * 4
 	
 		# Colocando Ponteiro Inicial do retângulo em t0
 		lw 	t0, init
-		add	t0, t0, s1	# Somando o valor de Xinicial
-		sub	t0, t0, s2 	# Subtraindo o valor de Yinicial
+		add	t0, t0, a1	# Somando o valor de Xinicial
+		sub	t0, t0, a2 	# Subtraindo o valor de Yinicial
 		
 		# Colore a coluna da esquerda
-		addi	s3, x0, 0
+		addi	a3, x0, 0
 		call draw_empty_rectangle_colum
 		
 		# Colore a linha de cima
 		addi	t0, t0, 256
-		addi	s3, x0, 0
+		addi	a3, x0, 0
 		call draw_empty_rectangle_line
 		
 		# Colocando Ponteiro Inicial do retângulo em t0
 		lw 	t0, init
-		add	t0, t0, s1
-		sub	t0, t0, s2
+		add	t0, t0, a1
+		sub	t0, t0, a2
 			
 		# Colore a linha de baixo
-		addi	s3, x0, 0
+		addi	a3, x0, 0
 		call draw_empty_rectangle_line
 		
 		# Colore a coluna da direita
 		addi	t0, t0, -4
-		addi	s3, x0, 0
+		addi	a3, x0, 0
 		call draw_empty_rectangle_colum
+		
 		ret
 		
-	# Desenha uma coluna, com ponto inicial t0, cor s5 e tamanho t5. OBS: Necessário s3 zerado
+	# Desenha uma coluna, com ponto inicial t0, cor a5 e tamanho t5. OBS: Necessário a3 zerado
 	draw_empty_rectangle_colum:
-		sw 	s5, 0(t0) 	# Colorindo o ponto atual
+		sw 	a5, 0(t0) 	# Colorindo o ponto atual
 		addi	t0, t0, -256	# Pula para o ponto na linha anterior
-		addi	s3, s3, 1	# Adiciona o contador de linha
-		bge 	t5, s3, draw_empty_rectangle_colum	# Confere se já acabou a linha
+		addi	a3, a3, 1	# Adiciona o contador de linha
+		bge 	t5, a3, draw_empty_rectangle_colum	# Confere se já acabou a linha
 		ret	
 	
-	# Desenha uma linha, com ponto inicial t0, cor s5 e tamanho t4. OBS: Necessário s3 zerado	
+	# Desenha uma linha, com ponto inicial t0, cor a5 e tamanho t4. OBS: Necessário a3 zerado	
 	draw_empty_rectangle_line:
-		sw 	s5, 0(t0) 	# Colorindo o ponto atual
+		sw 	a5, 0(t0) 	# Colorindo o ponto atual
 		addi	t0, t0, 4	# Pula para o próximo ponto
-		addi	s3, s3, 1	# Adiciona o contador de linha
-		bge 	t4, s3, draw_empty_rectangle_line	# Confere se já acabou a linha
+		addi	a3, a3, 1	# Adiciona o contador de linha
+		bge 	t4, a3, draw_empty_rectangle_line	# Confere se já acabou a linha
 		ret	
