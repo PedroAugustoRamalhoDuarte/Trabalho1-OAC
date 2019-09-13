@@ -36,6 +36,7 @@
 		b 	convert_negative_loop 		# repete o procedimento se não tiver chegado ao fim	
 		
 	cabouImagem:
-		ret					# retorna pra rotina principal
+		ebreak
+		#ret					# retorna pra rotina principal
 		
 	.include "/home/waliffcordeiro/UnB/OAC/Trabalho1-OAC/load_image.asm"

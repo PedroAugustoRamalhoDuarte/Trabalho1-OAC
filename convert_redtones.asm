@@ -1,6 +1,3 @@
-.data
-		li 	s8, 4096			# Tamanho da imagem - Quantidade de words que serão acessadas
-		li 	s7, 0x00FF0000			# Máscara que mantém apenas a informação do vermelho (RGB)
 .text	
 		# Local que está sendo carregada a imagem
 		la 	a0, image_name
@@ -9,6 +6,10 @@
 		lw 	a3, size			
 		jal 	load_image
 		lw 	a1, address
+		
+		# Máscara e tamanho da imagem
+		li 	s8, 4096			# Tamanho da imagem - Quantidade de words que serão acessadas
+		li 	s7, 0x00FF0000			# Máscara que mantém apenas a informação do vermelho (RGB)
 		
 	#-------------------------------------------------------------------------
 	# Funcao convert_redtones: Aplica uma máscara que zera todos os bits que não possuem a informação do vermelho
@@ -21,8 +22,7 @@
 	# 5 - Repete do passo 2 ao 4 de acordo com o size (tamanho da imagem)
 	#-------------------------------------------------------------------------
 		
-	convert_redtones:
-			
+	convert_redtones:	
 		lw 	s0,0(a1)			# pega o valor da imagem em 1 word
 		and	s0,s7,s0			# aplica a máscara
 		sw 	s0,0(a1)			# devolve o valor/cor da word para o endereço/imagem
@@ -32,6 +32,7 @@
 		b 	convert_redtones		# continua enquanto não acabar a imagem
 	
 	cabouImagem:
-		ret					# retorna pra rotina principal
+		ebreak
+		#ret					# retorna pra rotina principal
 				
 	.include "/home/waliffcordeiro/UnB/OAC/Trabalho1-OAC/load_image.asm"
