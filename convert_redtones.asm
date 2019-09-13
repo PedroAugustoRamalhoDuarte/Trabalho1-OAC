@@ -7,7 +7,7 @@
 		jal 	load_image
 		lw 	a1, address
 		
-		# Máscara e tamanho da imagem
+		# Máscara e tamanho da imagem - Quando declarei no .data deu ruim
 		li 	s8, 4096			# Tamanho da imagem - Quantidade de words que serão acessadas
 		li 	s7, 0x00FF0000			# Máscara que mantém apenas a informação do vermelho (RGB)
 		

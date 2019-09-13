@@ -7,7 +7,7 @@
 # Nome: 				Matrícula: 
 
 .data
-	image_name:   	.asciz "/home/waliffcordeiro/Downloads/pedro.jpeg"	# nome da imagem a ser carregada
+	image_name:   	.asciz "/home/waliffcordeiro/UnB/OAC/Trabalho1-OAC/lenaeye.raw"	# nome da imagem a ser carregada
 	address: 	.word   0x10040000			# endereco do bitmap display na memoria	
 	buffer:		.word   0					# configuracao default do RARS
 	size:		.word	4096				# numero de pixels da imagem
