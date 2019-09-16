@@ -13,6 +13,7 @@
 
 menu:		.asciz	"• Defina o número opção desejada: \n 1. Obtém ponto\n2. Desenha ponto\n3. Desenha retângulo com preenchimento\n4. Desenha retângulo sem preenchimento\n5. Converte para negativo da imagem\n6. Converte imagem para tons de vermelho\n7. Carrega imagem\n8. Encerra\n"
 menu_erro:	.asciz	"Opção não disponivel, porfavor digite um número válido\n"
+menu_volta:	.asciz	"Precione enter para voltar para o Menu\n"
 
 init:		.word	0x10043F00	# 0x10040000 + 64x63
 
@@ -27,6 +28,12 @@ ret4_yFinal:		.asciz	"Digite um valor para o Y final(0 a 63):"
 cor1:		.asciz	"Coloque a intencidade do Vermelho:"
 cor2:		.asciz	"Coloque a intencidade do Verde:"
 cor3:		.asciz	"Coloque a intencidade do Azul:"
+
+mR:		.asciz	"R= "
+mG:		.asciz	"G= "
+mB:		.asciz	"B= "
+mN:		.asciz	"\n"
+
 #
 #-------------------------------------------------------------------------
 
@@ -55,7 +62,13 @@ cor3:		.asciz	"Coloque a intencidade do Azul:"
 		#chamada de sistema ler um valor do console e guardar no registrador passdo como parâmetro -> definida por a7=7
 		#parâmetros: Onde o valor vai ser guardado
 		#retorno: salva o o valor inserido no console no registro passdo como parametro
-	
+
+.macro	input_string($arg) 
+		li	a7, 8		#a7 = 8 -> definição da chamada de sistema para ler uma string
+		ecall			#realiza a chamada de sistema
+		mv	$arg, a0 		#
+.end_macro
+			
 	
 .macro	input_int($arg) 
 		li	a7, 5		#a7 = 5 -> definição da chamada de sistema para ler número inteiro
@@ -79,11 +92,21 @@ cor3:		.asciz	"Coloque a intencidade do Azul:"
 		input_int(t1)
 		add 	$arg,$arg,t1		#colocando o verde no numero
 .end_macro
+
+.macro	print_int($arg)
+		#chamada de sistema para imprimir interios na tela -> definida por a7=1 
+		#parâmetros: a0 -> o valor a imprimir
+		#retorno: imprime um inteiro no console
+		li	a7, 1		#a7=1 -> definição da chamada de sistema para imprimir inteiros na tela
+		mv	a0, $arg	#a0=numero passado como parametro
+		ecall
+
+.end_macro
 #
 #-------------------------------------------------------------------------
 
 
-
+		
 Menu:		li	t0,1
 		print_string(menu)
 		input_int(t1)
@@ -116,12 +139,11 @@ ObtemPonto:
 		print_string(dp2)
 		input_int(s2)			#s2 = y
 		
-		lw 	t0, init
-		add	t0,t0,s1		#Somando o valor de X
-		sub	t0,t0,s2 		#Subtraindo o valor de Y
-		lw	s3,0(t0)		#pegando o valor da cor daquele pixel 0x00RRGGBB
+		jal	get_point
+		
 		
 		b	Menu
+
 
 DesenhaPonto:
 		print_string(dp1)
@@ -155,11 +177,30 @@ DesenhaRetPre:
 		# Coleta a cor RGB do teclado
 		input_Cor(s5)		#s5 = cor do ponto	
 		
-		call	draw_full_rectangle
+		jal	draw_full_rectangle	# Chama funcao
 		
 		b	Menu
 
 DesenhaRetVaz:
+		# Coleta os pontos do retângulo
+		print_string(ret1_xInicial)
+		input_int(s1)		# S1 = XInicial
+		
+		print_string(ret2_yInicial)
+		input_int(s2)		# S2 = YInicial
+		
+		print_string(ret3_xFinal)
+		input_int(s3)		# S3 = XFinal
+		
+		print_string(ret4_yFinal)
+		input_int(s4)		# S4 = YFinal
+		
+		# Coleta a cor RGB do teclado
+		input_Cor(s5)		#s5 = cor do ponto
+		
+		
+		call	draw_empty_rectangle	# Chama a funcao 
+
 		b	Menu
 
 Negativo:
@@ -179,6 +220,51 @@ Sair:
 		
 #-------------------------------------------------------------------------
 # Funcoes
+
+	#-----------------------------------------------------------------
+	# Funcao get_point:
+	get_point:
+		slli	s2,s2,8		#s2 = s2 * 4 * 64 Ajustando valores para encaixar na memoria
+		slli	s1,s1,2		#s1 = s1 * 4	  Ajustando valores para encaixar na memoria
+		
+		lw 	t0, init	#carregando o endereço do ponto (0,0)
+		add	t0,t0,s1	#Somando o valor de X
+		sub	t0,t0,s2 	#Subtraindo o valor de Y
+		mv	t1,s3		#Carregando a Cor
+		lw 	s4,0(t0) 	#Colocando o ponto na memoria
+		
+		mv	t2,s4		#Colocando a cor numa auxiliar
+		slli	t2,t2,8		#Apagando o byte da esquerda
+		srli	t2,t2,24	#Movendo o byte para mostrar na tela
+		print_string(mR)
+		print_int(t2)
+		print_string(mN)
+		
+		mv	t2,s4		#Colocando a cor numa auxiliar
+		slli	t2,t2,16	#Apagando o byte da esquerda
+		srli	t2,t2,24	#Movendo o byte para mostrar na tela
+		print_string(mG)
+		print_int(t2)
+		print_string(mN)
+		
+		mv	t2,s4		#Colocando a cor numa auxiliar
+		slli	t2,t2,24	#Apagando o byte da esquerda
+		srli	t2,t2,24	#Movendo o byte para mostrar na tela
+		print_string(mB)
+		print_int(t2)
+		print_string(mN)
+		
+		print_string(menu_volta)
+		input_string(t0)		#Trava o sistema para a pessoa ver o resultado
+		ret
+	
+	
+	
+	#
+	#-----------------------------------------------------------------
+
+
+
 
 	#-----------------------------------------------------------------
 	# Funcao draw_point: Recebe de parametro as coordenadas de um ponto 
@@ -254,6 +340,81 @@ Sair:
 		ret
 	#
 	#-----------------------------------------------------------------
+
+	#-------------------------------------------------------------------------
+	# Funcao draw_empty_rectangle: Recebe 2 pontos de parametro, cores RGB
+	# e desenha as bordas de  retângulo, tendo em vista que o X e o Y inciais são menores que os finais
+	# Parametros:
+	#	s1 - Xi
+	#	s2 - Yi
+	#	s3 - Xf
+	#	s4 - Yf
+	#	s5 - Cor RGB
+	#
+	# A função foi implementada da seguinte maneira:
+	# 1 - Coloca o ponteiro da imagem no ponto Xinicial, Yinicial
+	# 2 - Colore a coluna da esquerda, subtraindo 256 do ponteiro da imagem e pintando dentro do range recebido por parametro
+	# 3 - Colore a linha de cima, somando 4 do ponteiro da imagem resultado da operação de cima dentro do range
+	# 5 - Retorna o ponteiro da imagem para posição Xinicial, Yinicial
+	# 6 - Colore a linha de baixo, da mesma maneira do item 3
+	# 7 - Colore a coluna da direita, da mesma maneira do item 2
+	
+	draw_empty_rectangle:
+		# Auxiliares lógicos
+		sub	t4, s3, s1	# Delta X
+		sub	t5, s4, s2	# Delta Y
+		
+		# Multiplica para somar certo os ponteiros
+		slli	s2, s2, 8		#s2 = s2 * 4 * 64
+		slli	s1, s1, 2		#s1 = s1 * 4
+	
+		# Colocando Ponteiro Inicial do retângulo em t0
+		lw 	t0, init
+		add	t0, t0, s1	# Somando o valor de Xinicial
+		sub	t0, t0, s2 	# Subtraindo o valor de Yinicial
+		
+		# Colore a coluna da esquerda
+		addi	s3, x0, 0
+		call draw_empty_rectangle_colum
+		
+		# Colore a linha de cima
+		addi	t0, t0, 256
+		addi	s3, x0, 0
+		call draw_empty_rectangle_line
+		
+		# Colocando Ponteiro Inicial do retângulo em t0
+		lw 	t0, init
+		add	t0, t0, s1
+		sub	t0, t0, s2
+			
+		# Colore a linha de baixo
+		addi	s3, x0, 0
+		call draw_empty_rectangle_line
+		
+		# Colore a coluna da direita
+		addi	t0, t0, -4
+		addi	s3, x0, 0
+		call draw_empty_rectangle_colum
+		ret
+		
+	# Desenha uma coluna, com ponto inicial t0, cor s5 e tamanho t5. OBS: Necessário s3 zerado
+	draw_empty_rectangle_colum:
+		sw 	s5, 0(t0) 	# Colorindo o ponto atual
+		addi	t0, t0, -256	# Pula para o ponto na linha anterior
+		addi	s3, s3, 1	# Adiciona o contador de linha
+		bge 	t5, s3, draw_empty_rectangle_colum	# Confere se já acabou a linha
+		ret	
+	
+	# Desenha uma linha, com ponto inicial t0, cor s5 e tamanho t4. OBS: Necessário s3 zerado	
+	draw_empty_rectangle_line:
+		sw 	s5, 0(t0) 	# Colorindo o ponto atual
+		addi	t0, t0, 4	# Pula para o próximo ponto
+		addi	s3, s3, 1	# Adiciona o contador de linha
+		bge 	t4, s3, draw_empty_rectangle_line	# Confere se já acabou a linha
+		ret
+
+
+
 
 #
 #-------------------------------------------------------------------------
