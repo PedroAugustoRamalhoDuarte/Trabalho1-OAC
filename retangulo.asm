@@ -44,7 +44,7 @@
 		# Coleta a cor RGB do teclado
 		li a5, 0x00FF0000	
 		
-		jal draw_full_rectangle
+		jal draw_empty_rectangle
 		nop
 		
 		li a7, 10
@@ -74,8 +74,6 @@
 		bgt a3, t5, verifica_x_y_error
 		bgt a4, t5, verifica_x_y_error
 		nop
-		
-		li t5, -1
 		
 		# Agora verifica se são menores que 0
 		bltz a1, verifica_x_y_error
@@ -132,10 +130,10 @@
 	draw_full_rectangle:
 	
 		# Chama a sub-rotina que verifica se as entradas da função estão de acordo, e modifca dentro do possível
-		mv	s10, ra
+		mv	s10, ra		# Armazena o endereço da main em s10
 		jal 	verifica_x_y
 		
-		# Verifica se a subrotina verifictornou error
+		# Verifica se a subrotina verifica_x_y retornou error
 		beqz    a0, draw_full_rectangle_error
 		
 		# Auxiliares lógicos
@@ -146,8 +144,8 @@
 		addi	t3, a2, 0	# t3 contador para pontos na coluna
 		
 		# Multiplica para somar certo os ponteiros
-		slli	a2, a2, 8		#a2 = a2 * 4 * 64
-		slli	a1, a1, 2		#a1 = a1 * 4
+		slli	a2, a2, 8	# a2 = a2 * 4 * 64
+		slli	a1, a1, 2	# a1 = a1 * 4
 	
 		# Cor está em t1, ponteiro inicial do retangulo está em t0
 		lw 	t0, init
@@ -159,11 +157,11 @@
 		sw 	a5, 0(t0) 	# Colorindo o ponto atual
 		addi	t0, t0, 4	# Pula para o próximo ponto
 		addi	t2, t2, 1	# Adiciona o contador de linha
-		bgt 	t2, a3, caboulinha	# Confere se já acabou a linha
+		bgt 	t2, a3, draw_full_rectangle_caboulinha	# Confere se já acabou a linha
 		b	draw_full_rectangle_loop	# Enquanto não acabou a linha, pinta
 		nop
 		
-	caboulinha:
+	draw_full_rectangle_caboulinha:
 		# Muda a linha ou verifica se já acabou
 		
 		# Volta para o começo da linha usando t2 de auxiliar
@@ -175,10 +173,10 @@
 		sub	t2, a3, t4	# Reseta o Contador de linha t2 = XFinal - DeltaX
 		addi	t3, t3, 1	# Acrescenta contador de coluna
 		bge	a4, t3, draw_full_rectangle_loop	# Enquanto não tiver chegado na coluna máxima
-		jr	s10
+		jr	s10		# Retorna para main
 		
 	draw_full_rectangle_error:
-		jr	s10
+		jr	s10		# Retorna para main
 	#-----------------------------------------------------------------
 	
 	
@@ -201,6 +199,13 @@
 	# 7 - Colore a coluna da direita, da mesma maneira do item 2
 	
 	draw_empty_rectangle:
+		# Guarda o endereço de retorno para main
+		mv	s10, ra
+		jal 	verifica_x_y
+		
+		# Verifica se a subrotina verifica_x_y retornou error
+		beqz    a0, draw_full_rectangle_error
+		
 		# Auxiliares lógicos
 		sub	t4, a3, a1	# Delta X
 		sub	t5, a4, a2	# Delta Y
@@ -237,7 +242,7 @@
 		addi	a3, x0, 0
 		jal draw_empty_rectangle_colum
 		
-		ret
+		jr	s10	# Retorna para main
 		
 	# Desenha uma coluna, com ponto inicial t0, cor a5 e tamanho t5. OBS: Necessário a3 zerado
 	draw_empty_rectangle_colum:
