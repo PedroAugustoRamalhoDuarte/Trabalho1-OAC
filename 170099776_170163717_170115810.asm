@@ -13,7 +13,7 @@
 
 menu:		.asciz	"• Defina o número opção desejada: \n 1. Obtém ponto\n2. Desenha ponto\n3. Desenha retângulo com preenchimento\n4. Desenha retângulo sem preenchimento\n5. Converte para negativo da imagem\n6. Converte imagem para tons de vermelho\n7. Carrega imagem\n8. Encerra\n"
 menu_erro:	.asciz	"Opção não disponivel, porfavor digite um número válido\n"
-msgOutOfRange:	.asciz  "Por gentileza coloque os valores de X e Y, iniciais e finais, entre 0 e 63"
+msgOutOfRange:	.asciz  "Por gentileza coloque os valores de X e Y, iniciais e finais, entre 0 e 63\n"
 
 init:		.word	0x10043F00	# 0x10040000 + 64x63
 
@@ -126,35 +126,35 @@ ObtemPonto:
 
 DesenhaPonto:
 		print_string(dp1)
-		input_int(s1)		#s1 = X
+		input_int(s1)			#s1 = X
 		
 		
 		print_string(dp2)
-		input_int(s2)		#s2 = Y
+		input_int(s2)			#s2 = Y
 		
 		
-		input_Cor(s3)		#s3 = cor do ponto
+		input_Cor(s3)			#s3 = cor do ponto
 		
-		jal	draw_point	#Chamando a funcao
+		jal	draw_point		#Chamando a funcao
 		
 		b	Menu
 		
 DesenhaRetPre:
 		# Coleta os pontos do retângulo
 		print_string(ret1_xInicial)
-		input_int(a1)		# a1 = XInicial
+		input_int(a1)			# a1 = XInicial
 		
 		print_string(ret2_yInicial)
-		input_int(a2)		# a2 = YInicial
+		input_int(a2)			# a2 = YInicial
 		
 		print_string(ret3_xFinal)
-		input_int(a3)		# a3 = XFinal
+		input_int(a3)			# a3 = XFinal
 		
 		print_string(ret4_yFinal)
-		input_int(a4)		# a4 = YFinal
+		input_int(a4)			# a4 = YFinal
 		
 		# Coleta a cor RGB do teclado
-		input_Cor(a5)		# a5 = cor do retângulo
+		input_Cor(a5)			# a5 = cor do retângulo
 		
 		call	draw_full_rectangle
 		
@@ -163,19 +163,19 @@ DesenhaRetPre:
 DesenhaRetVaz:
 		# Coleta os pontos do retângulo
 		print_string(ret1_xInicial)
-		input_int(a1)		# a1 = XInicial
+		input_int(a1)			# a1 = XInicial
 		
 		print_string(ret2_yInicial)
-		input_int(a2)		# a2 = YInicial
+		input_int(a2)			# a2 = YInicial
 		
 		print_string(ret3_xFinal)
-		input_int(a3)		# a3 = XFinal
+		input_int(a3)			# a3 = XFinal
 		
 		print_string(ret4_yFinal)
-		input_int(a4)		# a4 = YFinal
+		input_int(a4)			# a4 = YFinal
 		
 		# Coleta a cor RGB do teclado
-		input_Cor(a5)		# a5 = cor da borda do retângulo
+		input_Cor(a5)			# a5 = cor da borda do retângulo
 		
 		call	draw_empty_rectangle
 		
