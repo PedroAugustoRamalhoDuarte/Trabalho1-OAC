@@ -1,70 +1,42 @@
-.data
-	aq:		.asciz	"Aqui\n"
-	ac:		.asciz	"acabou"
-
-.text
-	
-	.macro print_string($arg)
-		#chamada de sistema para imprimir strings na tela -> definida por a7=4 
-		#parâmetros: a0 -> endereço da string que se quer imprimir
-		#retorno: imprime uma string no console
-		li	a7, 4		#a7=4 -> definição da chamada de sistema para imprimir strings na tela
-		la	a0, $arg	#a0=endereço da string "str0"
-		ecall			#realiza a chamada de sistema
-	.end_macro
-	
+.text	
+		# Local que está sendo carregada a imagem
 		la 	a0, image_name
 		lw 	a1, address
 		la 	a2, buffer
 		lw 	a3, size
 		jal 	load_image
 		lw 	a1, address
-		jal	convert_negative
+	
+	#-------------------------------------------------------------------------
+	# Funcao convert_negative: Subtrair da máscara 0x00FFFFFF cada pixel
+	#
+	# A função foi implementada da seguinte maneira:
+	# 1 - Coloca o ponteiro no endereço do inicio da imagem
+	# 2 - Pega o valor da word atual
+	# 3 - Subtrai da máscara 0x00FFFFFF o valor da word
+	# 4 - Devolve o novo valor/cor para a imagem/endereço
+	# 5 - Avança o ponteiro do endereço para a próxima word
+	# 6 - Repete do passo 2 ao 4 de acordo com o size (tamanho da imagem)
+	#-------------------------------------------------------------------------
 	
 	convert_negative:
-		# define parâmetros e chama a função para carregar a imagem
-		
-		li 	s4, 4				# Setando mod 4 para ignorar o bit sem informação de cor
-		li 	s5, 0				# Contador
-		li 	s9, 0				# guardar o resultado
-		li 	s7, 255				# constante zero
-		li 	s8, 16384 			# 256*256/4 = 16384 - Verificar essa conta porque com metade do valor da o mesmo resultado	
-  	
+		# define parâmetros e segue para a função para carregar a imagem		
+		li 	s7, 0x00FFFFFF			# máscara que representa a constante 255 em cada byte com informação de cor
+		li 	s8, 4096 			# Tamanho da imagem (words) - Quantidade de loops
+		b	convert_negative_loop		# após inicialização, avança para a subrotina do loop		
 		
 	convert_negative_loop:
-		print_string(aq)
-		addi 	s5, s5,1  			# contador inicado em -1
-		rem 	s9,s5,s4   			# mod 4 com o contador
-		#blez	s9,ignore_mod_4 		# se for o 4º elemnto, não faz nada
 		
-		lb 	s0,0(a1)			# pega o valor da imagem em 1 byte
-		sub	s0,s7,s0			# subtrair 255
-		sb 	s0,0(a1)			# devolve o valor subtraido de 255 para a imagem		
-		addi 	a1,a1,2				# pega o próximo byte da imagem
-		
-		#beq 	s7,s8, cabouImagem		# verifica se o contador é <= 0 para saber se chegamos no fim da imagem
-		blez 	s8, cabouImagem
+		lw 	s0,0(a1)			# pega o valor de uma word da imagem
+		sub	s0,s7,s0			# subtrair byte a byte do valor 255 (255 - Informação de cor)
+		sw 	s0,0(a1)			# devolve 255 subtraido do valor para a imagem/endereço		
+		addi 	a1,a1,4				# pega a próxima word da imagem				
+		blez 	s8, cabouImagem			# verifica se o contador é 0 para saber se chegamos no fim da imagem
 		addi 	s8, s8, -1			# decrementa o contador 
-		jal 	convert_negative_loop 		# repete o procedimento se não tiver chegado ao fim	
-	
-	ignore_mod_4:
-		addi 	s8, s8, -1		
-		addi 	a1,a1,2
-		jal 	convert_negative_loop
+		b 	convert_negative_loop 		# repete o procedimento se não tiver chegado ao fim	
 		
 	cabouImagem:
-		print_string(ac)
-		li	a7,10
-		ecall
-		#ret
+		ebreak
+		#ret					# retorna pra rotina principal
 		
-		
-		
-		print_string(aq)
-
-
-
-	#definição da chamada de sistema para encerrar programa	
-	#parâmetros da chamada de sistema: a7=10
-
 	.include "/home/waliffcordeiro/UnB/OAC/Trabalho1-OAC/load_image.asm"
