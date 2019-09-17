@@ -44,7 +44,8 @@
 		# Coleta a cor RGB do teclado
 		li a5, 0x00FF0000	
 		
-		call verifica_x_y
+		call draw_full_rectangle
+		nop
 		
 		li a7, 10
 		ecall
@@ -61,41 +62,47 @@
 	#
 	verifica_x_y:
 		# Auxiliar de comparação
-		li t1, 63
+		li t5, 63
 		
 		# Primeiro verifica se são maiores 63
-		bgt a1, t1, verifica_x_y_error
-		bgt a2, t1, verifica_x_y_error
-		bgt a3, t1, verifica_x_y_error
-		bgt a4, t1, verifica_x_y_error
+		bgt a1, t5, verifica_x_y_error
+		bgt a2, t5, verifica_x_y_error
+		bgt a3, t5, verifica_x_y_error
+		bgt a4, t5, verifica_x_y_error
+		nop
 		
-		li t1, -1
+		li t5, -1
 		
 		# Agora verifica se são menores que 0
 		bltz a1, verifica_x_y_error
 		bltz a2, verifica_x_y_error
 		bltz a3, verifica_x_y_error
 		bltz a4, verifica_x_y_error
-	
+		nop
+		
 	verifica_x_y_adequado:	
 		# Agora ajusta para o a1 e o a2 serem os menores que a3 e a4, 
 		bgt a1, a3, verifica_x_y_swap_x
 		bgt a2, a4, verifica_x_y_swap_y
+		nop
+		
 		ret
 		
 	verifica_x_y_swap_x:
 		# Troca os valores de X
-		mv t1, a1
+		mv t5, a1
 		mv a1, a3
-		mv a3, t1
+		mv a3, t5
 		b verifica_x_y_adequado
-	
+		nop
+		
 	verifica_x_y_swap_y:
 		# Troca os valoers de Y
-		mv t1, a2
+		mv t5, a2
 		mv a2, a4
-		mv a4, t1
+		mv a4, t5
 		b verifica_x_y_adequado
+		nop
 		
 	verifica_x_y_error:
 		print_string(msgOutOfRange)
@@ -120,8 +127,10 @@
 	draw_full_rectangle:
 	
 		# Chama a sub-rotina que verifica se as entradas da função estão de acordo, e modifca dentro do possível
-		call	verifica_x_y
-			
+		#ebreak
+		#call	verifica_x_y
+		ebreak
+		
 		# Auxiliares lógicos
 		sub	t4, a3, a1	# Delta X
 		
@@ -145,6 +154,7 @@
 		addi	t2, t2, 1	# Adiciona o contador de linha
 		bgt 	t2, a3, caboulinha	# Confere se já acabou a linha
 		b	draw_full_rectangle_loop	# Enquanto não acabou a linha, pinta
+		nop
 		
 	caboulinha:
 		# Muda a linha ou verifica se já acabou
