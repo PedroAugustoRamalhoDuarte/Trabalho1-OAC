@@ -44,7 +44,7 @@
 		# Coleta a cor RGB do teclado
 		li a5, 0x00FF0000	
 		
-		call draw_full_rectangle
+		jal draw_full_rectangle
 		nop
 		
 		li a7, 10
@@ -59,8 +59,12 @@
 	#	a2 - Yi
 	#	a3 - Xf
 	#	a4 - Yf
-	#
+	# Retorno:
+	# 	a0 = 0, verificação falha
 	verifica_x_y:
+		# Inicializa o retorno como não falha
+		li a0, 1
+		
 		# Auxiliar de comparação
 		li t5, 63
 		
@@ -106,6 +110,7 @@
 		
 	verifica_x_y_error:
 		print_string(msgOutOfRange)
+		li a0, 0
 		ret
 		
 	#-----------------------------------------------------------------
@@ -127,9 +132,11 @@
 	draw_full_rectangle:
 	
 		# Chama a sub-rotina que verifica se as entradas da função estão de acordo, e modifca dentro do possível
-		#ebreak
-		#call	verifica_x_y
-		ebreak
+		mv	s10, ra
+		jal 	verifica_x_y
+		
+		# Verifica se a subrotina verifictornou error
+		beqz    a0, draw_full_rectangle_error
 		
 		# Auxiliares lógicos
 		sub	t4, a3, a1	# Delta X
@@ -158,14 +165,20 @@
 		
 	caboulinha:
 		# Muda a linha ou verifica se já acabou
+		
+		# Volta para o começo da linha usando t2 de auxiliar
 		mv	t2, t4
 		slli	t2, t2, 2	# Multiplica por 4	
-		sub	t0, t0, t2 	# Volta para o começo da linha
+		sub	t0, t0, t2 
+			
 		addi	t0, t0, -260	# Pula para linha anterior (- 256(linha) - 4(loop soma 4 antes de conferir se acabou)),
 		sub	t2, a3, t4	# Reseta o Contador de linha t2 = XFinal - DeltaX
 		addi	t3, t3, 1	# Acrescenta contador de coluna
 		bge	a4, t3, draw_full_rectangle_loop	# Enquanto não tiver chegado na coluna máxima
-		ret
+		jr	s10
+		
+	draw_full_rectangle_error:
+		jr	s10
 	#-----------------------------------------------------------------
 	
 	
@@ -203,12 +216,12 @@
 		
 		# Colore a coluna da esquerda
 		addi	a3, x0, 0
-		call draw_empty_rectangle_colum
+		jal draw_empty_rectangle_colum
 		
 		# Colore a linha de cima
 		addi	t0, t0, 256
 		addi	a3, x0, 0
-		call draw_empty_rectangle_line
+		jal draw_empty_rectangle_line
 		
 		# Colocando Ponteiro Inicial do retângulo em t0
 		lw 	t0, init
@@ -217,12 +230,12 @@
 			
 		# Colore a linha de baixo
 		addi	a3, x0, 0
-		call draw_empty_rectangle_line
+		jal draw_empty_rectangle_line
 		
 		# Colore a coluna da direita
 		addi	t0, t0, -4
 		addi	a3, x0, 0
-		call draw_empty_rectangle_colum
+		jal draw_empty_rectangle_colum
 		
 		ret
 		
