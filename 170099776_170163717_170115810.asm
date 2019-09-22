@@ -35,9 +35,9 @@ mG:		.asciz	"G= "
 mB:		.asciz	"B= "
 mN:		.asciz	"\n"
 
-image_name:   	.asciz "/home/pedro/UNB/5Semestre/OAC/Trabalho1OAC/lenaeye.raw"	# nome da imagem a ser carregada
+image_name:   	.asciz "lenaeye.raw"	# nome da imagem a ser carregada
 address: 	.word   0x10040000			# endereco do bitmap display na memoria	
-buffer:		.word   0					# configuracao default do RARS
+buffer:		.word   0				# configuracao default do RARS
 size:		.word	4096				# numero de pixels da imagem
 #
 #-------------------------------------------------------------------------
@@ -253,26 +253,12 @@ DesenhaRetVaz:
 		
 		b	Menu
 Negativo:
-		# Local que está sendo carregada a imagem
-		la 	a0, image_name
-		lw 	a1, address
-		la 	a2, buffer
-		lw 	a3, size
-		jal 	load_image
-		lw 	a1, address
-		
+		# Chama a sub rotina convert_negative	
 		jal 	convert_negative
 		b	Menu
 
-Vermelho:
-		# Local que está sendo carregada a imagem
-		la 	a0, image_name
-		lw 	a1, address
-		la 	a2, buffer
-		lw 	a3, size			
-		jal 	load_image
-		lw 	a1, address
-		
+Vermelho:	
+		# Chama a sub rotina convert_redtones	
 		jal	convert_redtones
 		b	Menu
 
@@ -699,6 +685,7 @@ Sair:
 		# define parâmetros e segue para a função para carregar a imagem		
 		li 	s7, 0x00FFFFFF			# máscara que representa a constante 255 em cada byte com informação de cor
 		li 	s8, 4096 			# Tamanho da imagem (words) - Quantidade de loops
+		lw 	a1, address
 		b	convert_negative_loop		# após inicialização, avança para a subrotina do loop		
 		
 	convert_negative_loop:
@@ -729,7 +716,8 @@ Sair:
 		# Máscara e tamanho da imagem - Quando declarei no .data deu ruim
 		li 	s8, 4096			# Tamanho da imagem - Quantidade de words que serão acessadas
 		li 	s7, 0x00FF0000			# Máscara que mantém apenas a informação do vermelho (RGB)
-	
+		lw 	a1, address
+		
 	convert_redtones_loop:	
 		lw 	s0,0(a1)			# pega o valor da imagem em 1 word
 		and	s0,s7,s0			# aplica a máscara
