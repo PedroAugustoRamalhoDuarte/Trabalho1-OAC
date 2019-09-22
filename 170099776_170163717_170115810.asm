@@ -401,42 +401,16 @@ Sair:
 # Funcões Retangulo
 
 	#-------------------------------------------------------------------------
-	# Funcao verifica_x_y: Verifica se todos os valores de entrada estão entre 0 e 63,
-	# e coloca o menor entre os X no a1 e o menor entre o Y no a2
+	# Funcao verifica_x_y: Coloca o menor entre os X no a1 e o menor entre o Y no a2
 	# Parametros:
 	#	a1 - Xi
 	#	a2 - Yi
 	#	a3 - Xf
 	#	a4 - Yf
-	# Retorno:
-	# 	a0 = 0, verificação falha
 	verifica_x_y:
-		# Inicializa o retorno como não falha
-		li a0, 1
-		
-		# Auxiliar de comparação
-		li t5, 63
-		
-		# Primeiro verifica se são maiores 63
-		bgt a1, t5, verifica_x_y_error
-		bgt a2, t5, verifica_x_y_error
-		bgt a3, t5, verifica_x_y_error
-		bgt a4, t5, verifica_x_y_error
-		nop
-		
-		# Agora verifica se são menores que 0
-		bltz a1, verifica_x_y_error
-		bltz a2, verifica_x_y_error
-		bltz a3, verifica_x_y_error
-		bltz a4, verifica_x_y_error
-		nop
-		
-	verifica_x_y_adequado:	
 		# Agora ajusta para o a1 e o a2 serem os menores que a3 e a4, 
 		bgt a1, a3, verifica_x_y_swap_x
 		bgt a2, a4, verifica_x_y_swap_y
-		nop
-		
 		ret
 		
 	verifica_x_y_swap_x:
@@ -444,21 +418,14 @@ Sair:
 		mv t5, a1
 		mv a1, a3
 		mv a3, t5
-		b verifica_x_y_adequado
-		nop
+		b verifica_x_y
 		
 	verifica_x_y_swap_y:
 		# Troca os valoers de Y
 		mv t5, a2
 		mv a2, a4
 		mv a4, t5
-		b verifica_x_y_adequado
-		nop
-		
-	verifica_x_y_error:
-		print_string(msgOutOfRange)
-		li a0, 0
-		ret
+		b verifica_x_y
 		
 	#-----------------------------------------------------------------
 	# Funcao draw_full_rectangle: Recebe de parametro 4 pontos e uma cor RGB
@@ -481,9 +448,6 @@ Sair:
 		# Chama a sub-rotina que verifica se as entradas da função estão de acordo, e modifca dentro do possível
 		mv	s10, ra		# Armazena o endereço da main em s10
 		jal 	verifica_x_y
-		
-		# Verifica se a subrotina verifica_x_y retornou error
-		beqz    a0, draw_full_rectangle_error
 		
 		# Auxiliares lógicos
 		sub	t4, a3, a1	# Delta X
@@ -523,9 +487,6 @@ Sair:
 		addi	t3, t3, 1	# Acrescenta contador de coluna
 		bge	a4, t3, draw_full_rectangle_loop	# Enquanto não tiver chegado na coluna máxima
 		jr	s10		# Retorna para main
-		
-	draw_full_rectangle_error:
-		jr	s10		# Retorna para main
 	#-----------------------------------------------------------------
 	
 	
@@ -551,9 +512,6 @@ Sair:
 		# Guarda o endereço de retorno para main
 		mv	s10, ra
 		jal 	verifica_x_y
-		
-		# Verifica se a subrotina verifica_x_y retornou error
-		beqz    a0, draw_full_rectangle_error
 		
 		# Auxiliares lógicos
 		sub	t4, a3, a1	# Delta X
