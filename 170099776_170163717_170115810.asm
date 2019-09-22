@@ -13,8 +13,8 @@
 
 menu:		.asciz	"• Defina o número opção desejada: \n 1. Obtém ponto\n2. Desenha ponto\n3. Desenha retângulo com preenchimento\n4. Desenha retângulo sem preenchimento\n5. Converte para negativo da imagem\n6. Converte imagem para tons de vermelho\n7. Carrega imagem\n8. Encerra\n"
 menu_erro:	.asciz	"Opção não disponivel, porfavor digite um número válido\n"
-menu_volta:	.asciz	"Precione enter para voltar para o Menu\n"
-msgOutOfRange:	.asciz  "Por gentileza coloque os valores de X e Y, iniciais e finais, entre 0 e 63\n"
+menu_volta:	.asciz	"\nPrecione enter para voltar para o Menu\n"
+msgOutOfRange:	.asciz  "Input com range incorreto, por gentileza coloque um número entre: 0 e "
 
 init:		.word	0x10043F00	# 0x10040000 + 64x63
 
@@ -85,16 +85,28 @@ size:		.word	4096				# numero de pixels da imagem
 .macro	input_Cor($arg)
 		print_string(cor1)
 		input_int(t1)
+		# Verifica se a entrada está entre 0 e 255
+		li	s11, 255
+		jal	input_range
+		
 		mv 	$arg, t1		#arg = R
 		slli	$arg,$arg,8		#movendos bits para poder encaixar o verde
 		
 		print_string(cor2)
 		input_int(t1)
+		# Verifica se a entrada está entre 0 e 255
+		li	s11, 255
+		jal	input_range
+		
 		add 	$arg,$arg,t1		#colocando o verde no numero
 		slli	$arg,$arg,8		#movendos bits para poder encaixar o azul
 		
 		print_string(cor3)
 		input_int(t1)
+		# Verifica se a entrada está entre 0 e 255
+		li	s11, 255
+		jal	input_range
+		
 		add 	$arg,$arg,t1		#colocando o verde no numero
 .end_macro
 
@@ -138,11 +150,18 @@ Menu:		li	t0,1
 
 
 ObtemPonto:
+		# Limite máximo do input = 63
+		li	s11, 63
+		
 		print_string(dp1)
-		input_int(s1)			#s1 = x
+		input_int(t1)
+		jal	input_range	# Verifica se o input está entre 0 e 63	
+		mv	s1, t1		#s1 = X
 		
 		print_string(dp2)
-		input_int(s2)			#s2 = y
+		input_int(t1)	
+		jal	input_range	# Verifica se o input está entre 0 e 63
+		mv	s2, t1		#s2 = Y
 		
 		jal	get_point
 		
@@ -151,13 +170,18 @@ ObtemPonto:
 
 
 DesenhaPonto:
-		print_string(dp1)
-		input_int(s1)		#s1 = X
+		# Limite máximo do input = 63
+		li	s11, 63
 		
+		print_string(dp1)
+		input_int(t1)
+		jal	input_range	# Verifica se o input está entre 0 e 63	
+		mv	s1, t1		#s1 = X
 		
 		print_string(dp2)
-		input_int(s2)		#s2 = Y
-		
+		input_int(t1)	
+		jal	input_range	# Verifica se o input está entre 0 e 63
+		mv	s2, t1		#s2 = Y
 		
 		input_Cor(s3)		#s3 = cor do ponto
 		
@@ -166,39 +190,61 @@ DesenhaPonto:
 		b	Menu
 		
 DesenhaRetPre:
+		# Limite máximo do input = 63
+		li	s11, 63
+		
 		# Coleta os pontos do retângulo
 		print_string(ret1_xInicial)
-		input_int(a1)			# a1 = XInicial
+		input_int(t1)			
+		jal input_range			# Verifica se o input está entre 0 e 63
+		mv	a1, t1			# a1 = XInicial
 		
 		print_string(ret2_yInicial)
-		input_int(a2)			# a2 = YInicial
+		input_int(t1)
+		jal input_range			# Verifica se o input está entre 0 e 63		
+		mv	a2, t1			# a2 = YInicial
 		
 		print_string(ret3_xFinal)
-		input_int(a3)			# a3 = XFinal
+		input_int(t1)
+		jal input_range			# Verifica se o input está entre 0 e 63			
+		mv	a3, t1			# a3 = XFinal
 		
 		print_string(ret4_yFinal)
-		input_int(a4)			# a4 = YFinal
+		input_int(t1)
+		jal input_range			# Verifica se o input está entre 0 e 63			
+		mv	a4, t1			# a4 = YFinal
 		
 		# Coleta a cor RGB do teclado
-		input_Cor(a5)			# a5 = cor do retângulo
+		input_Cor(a5)			# a5 = cor da borda do retângulo
 		
 		call	draw_full_rectangle
 		
 		b	Menu
 
 DesenhaRetVaz:
+		# Limite máximo do input = 63
+		li	s11, 63
+		
 		# Coleta os pontos do retângulo
 		print_string(ret1_xInicial)
-		input_int(a1)			# a1 = XInicial
+		input_int(t1)			
+		jal input_range			# Verifica se o input está entre 0 e 63
+		mv	a1, t1			# a1 = XInicial
 		
 		print_string(ret2_yInicial)
-		input_int(a2)			# a2 = YInicial
+		input_int(t1)
+		jal input_range			# Verifica se o input está entre 0 e 63		
+		mv	a2, t1			# a2 = YInicial
 		
 		print_string(ret3_xFinal)
-		input_int(a3)			# a3 = XFinal
+		input_int(t1)
+		jal input_range			# Verifica se o input está entre 0 e 63			
+		mv	a3, t1			# a3 = XFinal
 		
 		print_string(ret4_yFinal)
-		input_int(a4)			# a4 = YFinal
+		input_int(t1)
+		jal input_range			# Verifica se o input está entre 0 e 63			
+		mv	a4, t1			# a4 = YFinal
 		
 		# Coleta a cor RGB do teclado
 		input_Cor(a5)			# a5 = cor da borda do retângulo
@@ -250,6 +296,37 @@ Sair:
 #-------------------------------------------------------------------------
 # Funcoes
 
+#-------------------------------------------------------------------------
+# Subrotinas auxiliares
+	
+	#---------------------------------------------------------------
+	# Funcao input_range: verifica se o t1 está entre 0 e o valor do registrador s11,
+	# caso esteja dentro do esperado n faz nada, caso esteja fora do range volta ao menu
+	# Parâmetros:
+	# a2 - Valor máximo do input
+	#
+	# A função foi implementada da seguinte maneira:
+	# if (t1 < 0 and t1 > s11){
+	# 	menu();
+	# }	
+	input_range:
+		# Primeiro verifica se o input é menor que s11
+		bgt t1, s11, input_range_error
+		nop
+		
+		# Agora verifica se é menor que 0
+		bltz t1, input_range_error
+		
+		ret
+		
+	input_range_error:
+		print_string(msgOutOfRange)
+		print_int(s11)
+		print_string(menu_volta)
+		input_string(t0)		#Trava o sistema para a pessoa ver o resultado
+		b	Menu
+#-------------------------------------------------------------------------	
+		
 	#-----------------------------------------------------------------
 	# Funcao get_point: Recebe como parametro as conrdenadas de um ponto
 	# e imprime no console as suas componentes de cor.
