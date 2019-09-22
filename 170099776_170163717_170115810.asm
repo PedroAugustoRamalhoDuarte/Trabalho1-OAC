@@ -199,7 +199,7 @@ DesenhaRetVaz:
 		input_Cor(s5)		#s5 = cor do ponto
 		
 		
-		call	draw_empty_rectangle	# Chama a funcao 
+		jal	draw_empty_rectangle	# Chama a funcao 
 
 		b	Menu
 
@@ -222,7 +222,22 @@ Sair:
 # Funcoes
 
 	#-----------------------------------------------------------------
-	# Funcao get_point:
+	# Funcao get_point: Recebe como parametro as conrdenadas de um ponto
+	# e imprime no console as suas componentes de cor.
+	# Parâmetros:
+	# s1 - X
+	# s2 - Y
+	#
+	# A função foi implementada da seguinte maneira:
+	#
+	# 1 - Desloca o ponteiro para a posicao determinada por X e Y.
+	# 2 - Da um load na word que esta naquela regiao de memoria.
+	# 3 - Atravez de deslocamento vai limpando os bits nao necessarios 
+	# para cada cor.
+	# 4 - Imprime no console o resultado.
+	
+	
+	
 	get_point:
 		slli	s2,s2,8		#s2 = s2 * 4 * 64 Ajustando valores para encaixar na memoria
 		slli	s1,s1,2		#s1 = s1 * 4	  Ajustando valores para encaixar na memoria
@@ -273,6 +288,12 @@ Sair:
 	# s1 - X
 	# s2 - Y
 	# s3 - Cor RGB
+	#
+	# A função foi implementada da seguinte maneira:
+	#
+	# 1 - Desloca o ponteiro para a posicao determinada por X e Y.
+	# 2 - Salva a cor recebida por paramametro naquela posicção de memoria 
+	# que o ponteiro aponta.
 
 
 	draw_point:
@@ -375,12 +396,12 @@ Sair:
 		
 		# Colore a coluna da esquerda
 		addi	s3, x0, 0
-		call draw_empty_rectangle_colum
+		jal draw_empty_rectangle_colum
 		
 		# Colore a linha de cima
 		addi	t0, t0, 256
 		addi	s3, x0, 0
-		call draw_empty_rectangle_line
+		jal draw_empty_rectangle_line
 		
 		# Colocando Ponteiro Inicial do retângulo em t0
 		lw 	t0, init
@@ -389,12 +410,12 @@ Sair:
 			
 		# Colore a linha de baixo
 		addi	s3, x0, 0
-		call draw_empty_rectangle_line
+		jal draw_empty_rectangle_line
 		
 		# Colore a coluna da direita
 		addi	t0, t0, -4
 		addi	s3, x0, 0
-		call draw_empty_rectangle_colum
+		jal draw_empty_rectangle_colum
 		ret
 		
 	# Desenha uma coluna, com ponto inicial t0, cor s5 e tamanho t5. OBS: Necessário s3 zerado
