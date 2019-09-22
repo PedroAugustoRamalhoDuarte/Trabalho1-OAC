@@ -231,11 +231,17 @@ Vermelho:
 		b	Menu
 
 LoadImage:
+		# define parâmetros e chama a função para carregar a imagem
+		la 	a0, image_name
+		lw 	a1, address
+		la 	a2, buffer
+		lw 	a3, size
+		jal 	load_image
 		b	Menu
 
 Sair:
 		# Encerra o programa
-		li a7, 10
+		li 	a7, 10
 		ecall
 		
 		
